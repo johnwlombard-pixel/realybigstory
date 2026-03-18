@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Really Big Story</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Crimson+Pro:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  :root{
+    --ink:#1a1208;--parchment:#f7f3ec;--parchment-mid:#ede7d9;--parchment-dark:#d4c9b5;
+    --accent:#7a3e1a;--accent-light:#b5622e;--accent-faint:#f0e4d7;
+    --gold:#c49a2c;--muted:#6b5e4e;--green:#2d5a3d;--green-light:#e8f2ec;
+    --red:#8b2e2e;--red-light:#f5e8e8;--blue:#1e3d5c;--blue-light:#e8eef5;
+  }
+  body{background:var(--parchment);font-family:'Crimson Pro',serif;color:var(--ink);min-height:100vh;}
+  .top-bar{background:var(--ink);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:52px;border-bottom:2px solid var(--gold);}
+  .top-bar-title{font-family:'Playfair Display',serif;font-size:18px;color:var(--gold);letter-spacing:.04em;}
+  .top-bar-title em{font-style:italic;color:#e8c97a;}
+  .top-bar-nav{display:flex;gap:1.5rem;align-items:center;}
+  .top-bar-nav a{font-family:'Crimson Pro',serif;font-size:13px;color:#d4c9b5;text-decoration:none;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;}
+  .top-bar-nav a:hover{color:var(--gold);}
+  .role-badge{font-size:11px;padding:3px 10px;border-radius:20px;letter-spacing:.06em;text-transform:uppercase;}
+  .role-contributor{background:var(--accent);color:#fff3e8;}
+  .role-editor{background:var(--gold);color:var(--ink);}
+  .hero{background:var(--ink);padding:2.5rem 2rem 2rem;text-align:center;}
+  .hero-eyebrow{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:.75rem;}
+  .hero-title{font-family:'Playfair Display',serif;font-size:clamp(26px,5vw,48px);color:var(--parchment);line-height:1.15;margin-bottom:.4rem;}
+  .hero-title em{color:var(--gold);font-style:italic;}
+  .hero-opening{font-size:19px;color:#d4c9b5;font-style:italic;margin:1.25rem auto 0;max-width:480px;line-height:1.6;}
+  .hero-stats{display:flex;justify-content:center;gap:2.5rem;margin-top:1.75rem;padding-top:1.25rem;border-top:1px solid rgba(196,154,44,.3);}
+  .hero-stat{text-align:center;}
+  .hero-stat-num{font-family:'Playfair Display',serif;font-size:26px;color:var(--gold);display:block;}
+  .hero-stat-label{font-size:11px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
+  .main{max-width:1100px;margin:0 auto;padding:2rem 1.5rem;display:grid;grid-template-columns:1fr 320px;gap:2rem;}
+  .section-label{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:.75rem;padding-bottom:.5rem;border-bottom:1px solid var(--parchment-dark);}
+  .chapter-nav{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.5rem;}
+  .chapter-btn{font-family:'Crimson Pro',serif;font-size:14px;padding:6px 14px;border-radius:3px;border:1px solid var(--parchment-dark);background:var(--parchment);color:var(--muted);cursor:pointer;transition:all .15s;}
+  .chapter-btn:hover{border-color:var(--accent-light);color:var(--accent);}
+  .chapter-btn.active{background:var(--ink);border-color:var(--ink);color:var(--gold);}
+  .ai-summary{background:var(--accent-faint);border-left:3px solid var(--accent-light);border-radius:0 4px 4px 0;padding:1rem 1.25rem;margin-bottom:1.5rem;}
+  .ai-summary-label{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;}
+  .ai-summary-short p{font-size:15px;line-height:1.65;color:var(--accent);font-style:italic;}
+  .ai-summary-long{display:none;margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--parchment-dark);}
+  .ai-summary-long.open{display:block;}
+  .ai-summary-long p{font-size:14px;line-height:1.7;color:var(--accent);margin-bottom:.6rem;}
+  .ai-summary-long p:last-child{margin-bottom:0;}
+  .expand-btn{background:none;border:none;font-family:'Crimson Pro',serif;font-size:13px;color:var(--accent-light);cursor:pointer;padding:0;margin-top:.6rem;letter-spacing:.03em;display:flex;align-items:center;gap:4px;}
+  .expand-btn:hover{color:var(--accent);}
+  .expand-arrow{display:inline-block;transition:transform .2s;font-style:normal;font-size:10px;}
+  .expand-arrow.open{transform:rotate(180deg);}
+  .chars-panel{background:#fff;border:1px solid var(--parchment-dark);border-radius:4px;margin-bottom:1.5rem;overflow:hidden;}
+  .chars-header{background:var(--parchment-mid);padding:.65rem 1.25rem;border-bottom:1px solid var(--parchment-dark);display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
+  .chars-header h3{font-family:'Playfair Display',serif;font-size:14px;font-weight:400;color:var(--ink);}
+  .chars-header-right{display:flex;align-items:center;gap:.75rem;}
+  .chars-count{font-size:12px;color:var(--muted);}
+  .chars-toggle-arrow{font-size:12px;color:var(--muted);transition:transform .2s;display:inline-block;}
+  .chars-toggle-arrow.open{transform:rotate(180deg);}
+  .chars-body{display:none;padding:1rem;}
+  .chars-body.open{display:block;}
+  .char-filter-bar{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1rem;}
+  .char-filter{font-family:'Crimson Pro',serif;font-size:12px;padding:3px 10px;border-radius:20px;border:1px solid var(--parchment-dark);background:var(--parchment);color:var(--muted);cursor:pointer;transition:all .15s;letter-spacing:.04em;}
+  .char-filter:hover{border-color:var(--accent-light);color:var(--accent);}
+  .char-filter.active{background:var(--ink);border-color:var(--ink);color:var(--gold);}
+  .char-grid{display:grid;gap:.75rem;}
+  .char-card{background:var(--parchment);border:1px solid var(--parchment-dark);border-radius:4px;padding:.85rem;cursor:pointer;transition:border-color .15s;}
+  .char-card:hover{border-color:var(--accent-light);}
+  .char-card.expanded{border-color:var(--accent);background:var(--accent-faint);}
+  .char-card-top{display:flex;align-items:center;gap:.65rem;margin-bottom:.4rem;}
+  .char-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0;}
+  .char-name{font-family:'Playfair Display',serif;font-size:14px;color:var(--ink);}
+  .char-role-tag{font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-top:1px;}
+  .char-snippet{font-size:13px;line-height:1.55;color:var(--muted);font-style:italic;}
+  .char-detail{display:none;margin-top:.65rem;padding-top:.65rem;border-top:1px solid var(--parchment-dark);}
+  .char-detail.open{display:block;}
+  .char-detail p{font-size:13px;line-height:1.6;color:var(--ink);margin-bottom:.4rem;}
+  .char-detail p:last-child{margin-bottom:0;}
+  .char-detail-label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.2rem;margin-top:.5rem;}
+  .char-appears{display:flex;gap:.3rem;flex-wrap:wrap;margin-top:.35rem;}
+  .char-ch-pill{font-size:11px;padding:2px 7px;border-radius:20px;background:var(--ink);color:var(--gold);}
+  .story-card{background:#fff;border:1px solid var(--parchment-dark);border-radius:4px;overflow:hidden;margin-bottom:1.5rem;}
+  .story-card-header{background:var(--parchment-mid);padding:.75rem 1.25rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--parchment-dark);}
+  .story-card-chapter{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+  .story-card-meta{display:flex;align-items:center;gap:.75rem;font-size:13px;color:var(--muted);}
+  .avatar-row{display:flex;}
+  .avatar{width:22px;height:22px;border-radius:50%;border:1.5px solid #fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;margin-left:-6px;flex-shrink:0;}
+  .avatar:first-child{margin-left:0;}
+  .story-body{padding:1.5rem 1.75rem;}
+  .story-body p{font-size:18px;line-height:1.85;color:var(--ink);margin-bottom:1.2rem;}
+  .story-body p:last-child{margin-bottom:0;}
+  .contribute-bar{background:var(--ink);border-radius:4px;padding:1.25rem 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1.5rem;}
+  .contribute-bar-text{font-size:15px;color:#d4c9b5;font-style:italic;}
+  .btn{font-family:'Crimson Pro',serif;font-size:15px;padding:8px 20px;border-radius:3px;border:none;cursor:pointer;transition:all .15s;letter-spacing:.03em;white-space:nowrap;}
+  .btn-gold{background:var(--gold);color:var(--ink);}
+  .btn-gold:hover{background:#d4aa3a;}
+  .btn-ghost{background:transparent;border:1px solid var(--parchment-dark);color:var(--parchment);}
+  .btn-ghost:hover{border-color:var(--gold);color:var(--gold);}
+  .btn-sm{font-size:13px;padding:5px 14px;}
+  .write-panel{display:none;margin-bottom:1.5rem;}
+  .write-panel.visible{display:block;}
+  .write-area{width:100%;font-family:'Crimson Pro',serif;font-size:18px;line-height:1.85;color:var(--ink);background:#fff;border:1px solid var(--parchment-dark);border-radius:4px;padding:1.25rem 1.5rem;resize:vertical;min-height:140px;outline:none;margin-bottom:.75rem;}
+  .write-area:focus{border-color:var(--accent-light);}
+  .write-bar{display:flex;justify-content:flex-end;gap:.75rem;}
+  .sidebar-card{background:#fff;border:1px solid var(--parchment-dark);border-radius:4px;overflow:hidden;margin-bottom:1.25rem;}
+  .sidebar-card-head{background:var(--parchment-mid);padding:.6rem 1rem;border-bottom:1px solid var(--parchment-dark);}
+  .sidebar-card-head h3{font-family:'Playfair Display',serif;font-size:14px;font-weight:400;color:var(--ink);}
+  .sidebar-card-body{padding:1rem;}
+  .goal{padding:.75rem 0;border-bottom:1px solid var(--parchment-mid);}
+  .goal:last-child{border-bottom:none;padding-bottom:0;}
+  .goal-top{display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem;margin-bottom:.35rem;}
+  .goal-title{font-size:14px;line-height:1.4;color:var(--ink);flex:1;}
+  .status-pill{font-size:10px;padding:2px 8px;border-radius:20px;white-space:nowrap;letter-spacing:.06em;text-transform:uppercase;}
+  .status-progress{background:var(--blue-light);color:var(--blue);}
+  .status-open{background:var(--green-light);color:var(--green);}
+  .status-done{background:var(--parchment-mid);color:var(--muted);}
+  .progress-bar{height:4px;background:var(--parchment-mid);border-radius:2px;overflow:hidden;margin-bottom:.3rem;}
+  .progress-fill{height:100%;border-radius:2px;background:var(--blue);}
+  .goal-meta{font-size:12px;color:var(--muted);}
+  .contributor{display:flex;align-items:center;gap:.75rem;padding:.6rem 0;border-bottom:1px solid var(--parchment-mid);}
+  .contributor:last-child{border-bottom:none;}
+  .contributor-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;}
+  .contributor-info{flex:1;}
+  .contributor-name{font-size:14px;color:var(--ink);}
+  .contributor-words{font-size:12px;color:var(--muted);}
+  .tab-bar{display:flex;border-bottom:1px solid var(--parchment-dark);}
+  .tab{font-family:'Crimson Pro',serif;font-size:14px;padding:.5rem 1rem;border:none;background:transparent;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;letter-spacing:.04em;transition:all .15s;}
+  .tab:hover{color:var(--ink);}
+  .tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+  .tab-content{display:none;}
+  .tab-content.active{display:block;}
+  .editor-note{background:#fffef7;border:1px solid #e8d98a;border-radius:3px;padding:.75rem;margin-bottom:.75rem;font-size:14px;line-height:1.5;color:var(--ink);}
+  .editor-note:last-child{margin-bottom:0;}
+  .editor-note-who{font-size:12px;color:var(--muted);margin-top:.35rem;}
+  @media(max-width:760px){
+    .main{grid-template-columns:1fr;}
+    .sidebar{order:-1;}
+    .hero-stats{gap:1.5rem;}
+    .top-bar-nav a{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="top-bar-title"><em>The Really Big Story</em></div>
+  <div class="top-bar-nav">
+    <a href="#">Read</a>
+    <a href="#">Chapters</a>
+    <a href="#">Contributors</a>
+    <span class="role-badge role-contributor">Contributor</span>
+  </div>
+</div>
+
+<div class="hero">
+  <div class="hero-eyebrow">One story. Infinite voices.</div>
+  <div class="hero-title">It was a dark<br>and <em>stormy night</em>...</div>
+  <div class="hero-opening">"The kind of night that makes you believe in ghosts — or at least wish you didn't."</div>
+  <div class="hero-stats">
+    <div class="hero-stat"><span class="hero-stat-num">3,847</span><span class="hero-stat-label">Contributors</span></div>
+    <div class="hero-stat"><span class="hero-stat-num">14</span><span class="hero-stat-label">Chapters</span></div>
+    <div class="hero-stat"><span class="hero-stat-num">284k</span><span class="hero-stat-label">Words written</span></div>
+    <div class="hero-stat"><span class="hero-stat-num">6</span><span class="hero-stat-label">Active goals</span></div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="story-col">
+    <div class="section-label">Chapters</div>
+    <div class="chapter-nav">
+      <button class="chapter-btn" onclick="setChapter(1,this)">I. The Storm</button>
+      <button class="chapter-btn active" onclick="setChapter(2,this)">II. The Stranger</button>
+      <button class="chapter-btn" onclick="setChapter(3,this)">III. The Letter</button>
+      <button class="chapter-btn" onclick="setChapter(4,this)">IV. The Crossing</button>
+      <button class="chapter-btn" onclick="setChapter(5,this)">V. What Remains</button>
+    </div>
+
+    <div class="ai-summary">
+      <div class="ai-summary-label">AI summary — catch up in 30 seconds</div>
+      <div class="ai-summary-short">
+        <p id="summary-short">In Chapter I, a coastal storm wrecked a ship near the village. One passenger survived — tall, silent, clutching a letter addressed to someone twenty years dead. Elara, who hears voices in the waves, helped pull him from the surf.</p>
+      </div>
+      <button class="expand-btn" id="expand-btn" onclick="toggleSummary()">
+        <span class="expand-arrow" id="expand-arrow">▼</span> Read more detailed summary
+      </button>
+      <div class="ai-summary-long" id="summary-long">
+        <p id="long-p1">Chapter I opens on an unseasonal storm striking an unnamed coastal village with unusual ferocity. We meet Elara, the lighthouse keeper's daughter, who has carried since childhood a strange sensitivity: she hears voices in the waves. Her grandmother first named this gift, and it has shaped her isolation ever since.</p>
+        <p id="long-p2">As Elara climbs the lighthouse to tend the lantern, the waves begin screaming — which she understands as a warning. Moments later, she witnesses a ship founder on the rocks offshore. Fishermen drag a single survivor from the surf: a tall man, foreign, with rope-worn hands and deep-water eyes. He is carrying a letter. The envelope is addressed, in faded ink, to a woman the village buried twenty years ago.</p>
+        <p id="long-p3">Chapter II picks up the following morning. The stranger is awake, sitting upright in Elara's spare room, staring at the wall. He has folded the letter into a careful square and placed it deliberately under the oil lamp. Elara tries to reach him in three languages. He doesn't respond until she speaks an old coastal dialect her grandmother taught her, half-forgotten, rough as salt. He blinks. Once. Slowly. As if acknowledging a debt.</p>
+      </div>
+    </div>
+
+    <div class="chars-panel">
+      <div class="chars-header" onclick="toggleChars()">
+        <h3>Character recap</h3>
+        <div class="chars-header-right">
+          <span class="chars-count">5 characters</span>
+          <span class="chars-toggle-arrow" id="chars-arrow">▼</span>
+        </div>
+      </div>
+      <div class="chars-body" id="chars-body">
+        <div class="char-filter-bar">
+          <button class="char-filter active" onclick="filterChars('all',this)">All</button>
+          <button class="char-filter" onclick="filterChars('main',this)">Main</button>
+          <button class="char-filter" onclick="filterChars('supporting',this)">Supporting</button>
+          <button class="char-filter" onclick="filterChars('mentioned',this)">Mentioned</button>
+        </div>
+        <div class="char-grid" id="char-grid"></div>
+      </div>
+    </div>
+
+    <div class="story-card">
+      <div class="story-card-header">
+        <span class="story-card-chapter" id="chapter-label">Chapter II · The Stranger</span>
+        <div class="story-card-meta">
+          <div class="avatar-row">
+            <div class="avatar" style="background:#d4b49a;color:#5a3218;">KL</div>
+            <div class="avatar" style="background:#a8c4b8;color:#1a4a3a;">MR</div>
+            <div class="avatar" style="background:#b4a8d4;color:#2e1a5a;">YP</div>
+            <div class="avatar" style="background:#c4b8a8;color:#3a3018;">+9</div>
+          </div>
+          <span>12 contributors</span>
+        </div>
+      </div>
+      <div class="story-body" id="story-body">
+        <p>The man they pulled from the surf spoke no language anyone in the village recognized. He was tall — unusually so — with hands roughened by rope-work and eyes the color of deep water. The doctor said he was perhaps forty. Elara thought he looked older than the sea itself.</p>
+        <p>She found him in the morning, sitting up in the spare room, staring at the wall as though reading something written there that no one else could see. He had folded the letter into a perfect square and placed it beneath the oil lamp, and something in the deliberateness of the gesture told her he did not want it discussed.</p>
+        <p>"You're safe," she said in three languages. He turned to look at her only when she said it in the fourth — an old coastal dialect her grandmother had taught her, half-forgotten, rough as salt on the tongue. His expression did not change, but he blinked. Once. Slowly. As if acknowledging a debt.</p>
+      </div>
+    </div>
+
+    <div id="write-panel" class="write-panel">
+      <div class="section-label">Continue the story</div>
+      <textarea class="write-area" placeholder="He rose from the bed and crossed to the window..."></textarea>
+      <div class="write-bar">
+        <button class="btn btn-ghost btn-sm" onclick="toggleWrite()">Cancel</button>
+        <button class="btn btn-gold btn-sm">Submit paragraph</button>
+      </div>
+    </div>
+
+    <div class="contribute-bar" id="contribute-bar">
+      <span class="contribute-bar-text">Where does the story go next? Add your voice.</span>
+      <button class="btn btn-gold" onclick="toggleWrite()">Continue writing →</button>
+    </div>
+
+    <div class="sidebar-card">
+      <div class="tab-bar">
+        <button class="tab active" onclick="setTab('notes',this)">Editor notes</button>
+        <button class="tab" onclick="setTab('history',this)">Revision history</button>
+      </div>
+      <div id="tab-notes" class="tab-content active" style="padding:1rem;">
+        <div class="editor-note">The stranger's motivations feel opaque in a compelling way — but we need at least one more scene where we glimpse what he <em>wants</em> before Chapter V. Contributors, please keep this in mind.<div class="editor-note-who">— Editor Marguerite · 2 days ago</div></div>
+        <div class="editor-note">The dialect detail is wonderful but inconsistently applied. Going forward, Elara should use it only when deeply emotional. Let's preserve its power.<div class="editor-note-who">— Editor Tomáš · 4 days ago</div></div>
+      </div>
+      <div id="tab-history" class="tab-content" style="padding:1rem;font-size:14px;color:var(--muted);line-height:1.7;">
+        <div style="padding:.5rem 0;border-bottom:1px solid var(--parchment-mid);">Paragraph 3 revised by <strong>YaelP</strong> · 1 hr ago</div>
+        <div style="padding:.5rem 0;border-bottom:1px solid var(--parchment-mid);">Paragraph added by <strong>KiraL</strong> · 3 hrs ago</div>
+        <div style="padding:.5rem 0;border-bottom:1px solid var(--parchment-mid);">AI summary regenerated · 5 hrs ago</div>
+        <div style="padding:.5rem 0;">Chapter II opened by <strong>Editor Marguerite</strong> · 2 days ago</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <div class="sidebar-card">
+      <div class="sidebar-card-head"><h3>Active goals</h3></div>
+      <div class="sidebar-card-body">
+        <div class="goal">
+          <div class="goal-top"><span class="goal-title">Strengthen the stranger's backstory</span><span class="status-pill status-progress">In progress</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:62%;"></div></div>
+          <div class="goal-meta">62% · 8 contributors working</div>
+        </div>
+        <div class="goal">
+          <div class="goal-top"><span class="goal-title">Resolve the letter's recipient mystery</span><span class="status-pill status-open">Open</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:18%;background:var(--green);"></div></div>
+          <div class="goal-meta">18% · 3 contributors working</div>
+        </div>
+        <div class="goal">
+          <div class="goal-top"><span class="goal-title">Introduce a second point-of-view character</span><span class="status-pill status-done">Done</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:100%;background:var(--muted);"></div></div>
+          <div class="goal-meta">Completed · Ch. III</div>
+        </div>
+        <div style="margin-top:.75rem;"><button class="btn btn-ghost btn-sm" style="width:100%;color:var(--muted);border-color:var(--parchment-dark);border-style:solid;">+ Propose a new goal</button></div>
+      </div>
+    </div>
+    <div class="sidebar-card">
+      <div class="sidebar-card-head"><h3>Recent contributors</h3></div>
+      <div class="sidebar-card-body" style="padding-top:.5rem;padding-bottom:.5rem;">
+        <div class="contributor"><div class="contributor-avatar" style="background:#f0e0d0;color:#7a3e1a;">KL</div><div class="contributor-info"><div class="contributor-name">KiraL</div><div class="contributor-words">Added 340 words · today</div></div><span class="role-badge role-contributor" style="font-size:10px;">Writer</span></div>
+        <div class="contributor"><div class="contributor-avatar" style="background:#d0e8e0;color:#1a5a3a;">MR</div><div class="contributor-info"><div class="contributor-name">Marguerite</div><div class="contributor-words">Edited Ch. II · 2 days ago</div></div><span class="role-badge role-editor" style="font-size:10px;">Editor</span></div>
+        <div class="contributor"><div class="contributor-avatar" style="background:#ddd0f0;color:#3a1a7a;">YP</div><div class="contributor-info"><div class="contributor-name">YaelP</div><div class="contributor-words">Revised para 3 · 1 hr ago</div></div><span class="role-badge role-contributor" style="font-size:10px;">Writer</span></div>
+      </div>
+    </div>
+    <div class="sidebar-card">
+      <div class="sidebar-card-head"><h3>Community pledge</h3></div>
+      <div class="sidebar-card-body">
+        <div style="font-size:14px;line-height:1.7;color:var(--muted);font-style:italic;">"This story belongs to everyone. We write without hate, without cruelty toward one another, and with respect for every voice that joins the page."</div>
+        <div style="margin-top:.75rem;font-size:12px;color:var(--muted);">You agreed to the contributor guidelines on joining. <a href="#" style="color:var(--accent-light);">Review them.</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const characters=[
+  {id:'elara',name:'Elara',initials:'EL',role:'main',roleLabel:'Protagonist',avatarBg:'#d4b49a',avatarColor:'#5a3218',snippet:'Lighthouse keeper\'s daughter. Hears voices in the waves.',detail:'Elara has lived her whole life on the coast, shaped by the sea and by her grandmother\'s teachings. She is quiet, observant, and deeply intuitive — sometimes uncomfortably so. Her ability to hear meaning in the waves has left her somewhat apart from the rest of the village.',traits:'Perceptive · Isolated · Brave · Linguistically gifted',appears:[1,2,3,4,5],lastSeen:'Ch. II'},
+  {id:'rael',name:'Rael',initials:'RA',role:'main',roleLabel:'The Stranger',avatarBg:'#b4c4d4',avatarColor:'#1a2e4a',snippet:'Shipwreck survivor. Carries a letter for the dead.',detail:'Rael gives only one name — and makes clear it\'s the name she can use, not necessarily his real one. He is guarded, deliberate, and clearly carrying a long history. He responds only to Elara\'s old coastal dialect, suggesting deep roots in a culture connected to this coast.',traits:'Guarded · Purposeful · Weathered · Enigmatic',appears:[2,3,4,5],lastSeen:'Ch. IV'},
+  {id:'hareth',name:'Councillor Hareth',initials:'CH',role:'supporting',roleLabel:'Supporting — antagonist-adjacent',avatarBg:'#c8c4b0',avatarColor:'#3a3618',snippet:'Village elder. Recognizes the name on the letter.',detail:'Hareth has governed this coast for thirty years with quiet authority. He buried his sister\'s name twenty-two years ago after she was lost in the great crossing — or so he believed. The letter\'s arrival forces him to reckon with a past he deliberately sealed.',traits:'Controlled · Haunted · Politically cautious · Grieving',appears:[3,5],lastSeen:'Ch. V'},
+  {id:'grandmother',name:'The Grandmother',initials:'GM',role:'mentioned',roleLabel:'Referenced — deceased',avatarBg:'#d0c8b8',avatarColor:'#4a3e28',snippet:'Taught Elara the old coastal dialect and the gift of listening.',detail:'Never seen in the present timeline, the grandmother exists in Elara\'s memory and in the old coastal dialect she left behind. She is the thread connecting Elara\'s strange gift to the deeper history of the coast.',traits:'Mysterious in memory · Wise · Connected to the old ways',appears:[1,2,5],lastSeen:'Ch. V (referenced)'},
+  {id:'woman',name:'The Woman in the Chapel',initials:'WC',role:'supporting',roleLabel:'Supporting — late reveal',avatarBg:'#c8b4c0',avatarColor:'#4a1a3a',snippet:'Ancient. Patient. Waiting in the ruined chapel on the island.',detail:'She appears only in Chapter V, but her presence has been felt throughout — she is the letter\'s true recipient. Her eyes are the same deep water color as Rael\'s. She has been on the island long enough to have made peace with waiting.',traits:'Ancient · Still · Knowing · Connected to Rael',appears:[5],lastSeen:'Ch. V'}
+];
+
+const chapters={
+  1:{label:'I. The Storm',shortSummary:'In Chapter I, a fierce coastal storm batters a small village. Elara, a lighthouse keeper\'s daughter, watches helplessly as a ship founders on the rocks. One passenger survives — clutching a letter addressed to someone twenty years dead.',longP1:'Chapter I opens on an unseasonal storm striking an unnamed coastal village with unusual ferocity. We meet Elara, the lighthouse keeper\'s daughter, who has carried since childhood a strange sensitivity: she hears voices in the waves. Her grandmother first named this gift.',longP2:'As Elara climbs the lighthouse, the waves begin screaming. She witnesses a ship founder on the rocks. Fishermen drag one survivor from the surf: a tall man, foreign, with rope-worn hands. He carries a letter addressed to a woman the village buried twenty years ago.',longP3:'The chapter ends on this impossible detail: the name on the envelope, the village\'s quiet dread, and Elara — already sensing that what washed ashore is not finished arriving.',text:['The storm came from the northwest with no warning anyone in the village could remember. It tore the shutters from Margold\'s bakery and sent the harbor boats spinning like toys. Elara climbed the lighthouse stairs three at a time, her lantern guttering in the updraft.','Below, the waves were speaking. They always spoke — this she had known since childhood, when her grandmother had first put a hand to her ear and said, listen. But tonight they were screaming, which meant something was coming that the sea did not want to receive.','She saw the ship first as a silhouette against the lightning. Then as a sound: a groan of timber and a crack she felt in her back teeth. Then as a man, impossibly, walking out of the surf.']},
+  2:{label:'II. The Stranger',shortSummary:'In Chapter I, a coastal storm produced a single survivor. Chapter II opens the morning after: the stranger is awake in the spare room, silent. Elara attempts communication — and her grandmother\'s old dialect seems to reach him.',longP1:'Chapter II opens the morning after the wreck. The stranger is awake, sitting with unusual stillness in Elara\'s spare room, staring at the wall as though reading something written there invisible to others. He has folded the letter into a deliberate square.',longP2:'Elara attempts to communicate in three languages. Nothing. On the fourth — her grandmother\'s half-forgotten coastal dialect — he blinks. Once. Slowly. It is not much, but it is something, and Elara understands this man has reasons for what he reveals and what he doesn\'t.',longP3:'The chapter is quiet and tense, full of what is not said. The letter sits folded under the lamp like a sealed verdict.',text:['The man they pulled from the surf spoke no language anyone in the village recognized. He was tall — unusually so — with hands roughened by rope-work and eyes the color of deep water. The doctor said he was perhaps forty. Elara thought he looked older than the sea itself.','She found him in the morning, sitting up in the spare room, staring at the wall as though reading something written there that no one else could see. He had folded the letter into a perfect square and placed it beneath the oil lamp, and something in the deliberateness of the gesture told her he did not want it discussed.','"You\'re safe," she said in three languages. He turned to look at her only when she said it in the fourth — an old coastal dialect her grandmother had taught her, half-forgotten, rough as salt on the tongue. His expression did not change, but he blinked. Once. Slowly. As if acknowledging a debt.']},
+  3:{label:'III. The Letter',shortSummary:'Chapter III introduces Councillor Hareth, who governed this coast for thirty years and recognizes the name on the letter. He believed its intended recipient — his sister — drowned in the great crossing. The stranger\'s arrival upends everything.',longP1:'We shift to Councillor Hareth\'s perspective. He has not spoken his sister\'s name aloud in twenty-two years — and has arranged the village\'s silence around it. When a fisherman\'s boy brings him the salvaged letter, Hareth stands motionless for a long time.',longP2:'The name on the envelope is unmistakably hers. Hareth believed she drowned in the great crossing. Now he must confront the possibility that she didn\'t — and that this stranger knows where she went.',longP3:'The chapter ends with Hareth\'s controlled, frightened question: "Where is the man who carried this?" It\'s a line that could mean many things, none of them simple.',text:['Hareth had not spoken his sister\'s name aloud in twenty-two years. He had arranged it so that no one would speak it in his presence, and the village, as villages do, had quietly obliged.','When the fisherman\'s boy knocked on his door and showed him the name on the salvaged letter — the ink blurred but legible, the handwriting unmistakably hers — Hareth did not move for a long time. He stood in the doorway holding it at arm\'s length, as though it were something that might bite.','"Where," he said at last, "is the man who carried this?"']},
+  4:{label:'IV. The Crossing',shortSummary:'Elara and Rael take a boat to the offshore island, where the letter was meant to be delivered. On the water, Rael reveals his name — and fragments of a story about a woman who may have survived the great crossing after all.',longP1:'Elara rows Rael to the island offshore. He gives her a name on the water: Rael. He makes clear this is the name she can use — not necessarily his only one. She doesn\'t press.',longP2:'As the island approaches, Rael speaks more than he has in two days: "She is alive." Not quite a statement, not quite a prayer. Elara understands this crossing is not just geographical — it\'s the culmination of something very long.',longP3:'The chapter is spare and wind-driven, full of salt and silence and the weight of what one person promises another across impossible distances.',text:['He told her his name on the water. Or rather: he told her the name she could use, which she understood was different. Rael. Two syllables, clean as a bell.','The rowing was hard against the current and she did not talk because she needed her breath and because she sensed he was finally ready to speak. He was looking at the island the way people look at things they have been picturing for a very long time.','"She is alive," he said. It was not a question and it was not, quite, a statement. It was something closer to a prayer said aloud to test whether the sky would contradict it.']},
+  5:{label:'V. What Remains',shortSummary:'All threads converge in the island\'s ruined chapel. The letter is delivered. The woman who receives it is very old — with the same deep-water eyes as Rael. Elara stands witness to something that was never meant for her, but now inescapably is.',longP1:'The woman in the chapel has been waiting long enough to have forgotten impatience. She sits in the one whole chair among the rubble, coat too large for her, hands folded. Rael stops in the doorway. They look at each other across twenty-two years.',longP2:'Neither speaks. The silence is so full that Elara looks away — and finds herself reading old words carved into the chapel walls, in her grandmother\'s language, the old coastal dialect she thought was lost.',longP3:'She realizes she was brought here not as a translator but as a witness. Someone had to remember this, and she is the only one young enough to carry it forward. The chapter ends on this quiet, devastating understanding.',text:['The woman in the chapel was ancient. She sat in the one chair that remained whole among the rubble, wrapped in a coat too large for her, her hands folded in her lap with the patience of someone who had been waiting long enough to have forgotten what impatience felt like.','Rael stopped in the doorway. They looked at each other across twenty years and a ruined nave, and neither of them spoke, and the silence was so full that Elara had to look away.','She looked instead at the walls — at the old words carved there in the coastal dialect, her grandmother\'s language, the one she had thought was lost. And she understood, suddenly, why she was here. Not as a translator. As a witness. Someone had to remember this, and she was the only one young enough to carry it forward.']}
+};
+
+let summaryOpen=false;
+let charsOpen=false;
+let currentFilter='all';
+
+function setChapter(num,btn){
+  document.querySelectorAll('.chapter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const ch=chapters[num];
+  document.getElementById('summary-short').textContent=ch.shortSummary;
+  document.getElementById('long-p1').textContent=ch.longP1;
+  document.getElementById('long-p2').textContent=ch.longP2;
+  document.getElementById('long-p3').textContent=ch.longP3;
+  document.getElementById('story-body').innerHTML=ch.text.map(t=>`<p>${t}</p>`).join('');
+  document.getElementById('chapter-label').textContent='Chapter '+ch.label;
+  if(summaryOpen){summaryOpen=false;document.getElementById('summary-long').classList.remove('open');document.getElementById('expand-btn').innerHTML='<span class="expand-arrow" id="expand-arrow">▼</span> Read more detailed summary';}
+}
+
+function toggleSummary(){
+  summaryOpen=!summaryOpen;
+  document.getElementById('summary-long').classList.toggle('open',summaryOpen);
+  document.getElementById('expand-btn').innerHTML=`<span class="expand-arrow${summaryOpen?' open':''}" id="expand-arrow">▼</span> ${summaryOpen?'Show less':'Read more detailed summary'}`;
+}
+
+function toggleChars(){
+  charsOpen=!charsOpen;
+  document.getElementById('chars-body').classList.toggle('open',charsOpen);
+  document.getElementById('chars-arrow').classList.toggle('open',charsOpen);
+}
+
+function filterChars(type,btn){
+  document.querySelectorAll('.char-filter').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  currentFilter=type;
+  renderChars();
+}
+
+function renderChars(){
+  const filtered=currentFilter==='all'?characters:characters.filter(c=>c.role===currentFilter);
+  const grid=document.getElementById('char-grid');
+  grid.style.gridTemplateColumns=`repeat(${Math.min(filtered.length,2)},minmax(0,1fr))`;
+  grid.innerHTML=filtered.map(c=>`
+    <div class="char-card" id="card-${c.id}" onclick="toggleChar('${c.id}')">
+      <div class="char-card-top">
+        <div class="char-avatar" style="background:${c.avatarBg};color:${c.avatarColor};">${c.initials}</div>
+        <div><div class="char-name">${c.name}</div><div class="char-role-tag">${c.roleLabel}</div></div>
+      </div>
+      <div class="char-snippet">"${c.snippet}"</div>
+      <div class="char-detail" id="detail-${c.id}">
+        <p>${c.detail}</p>
+        <div class="char-detail-label">Key traits</div>
+        <p style="font-size:13px;color:var(--muted);">${c.traits}</p>
+        <div class="char-detail-label">Appears in</div>
+        <div class="char-appears">${c.appears.map(n=>`<span class="char-ch-pill">Ch. ${['I','II','III','IV','V'][n-1]}</span>`).join('')}</div>
+        <div class="char-detail-label">Last seen</div>
+        <p style="font-size:13px;color:var(--muted);">${c.lastSeen}</p>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleChar(id){
+  const card=document.getElementById('card-'+id);
+  const detail=document.getElementById('detail-'+id);
+  const isOpen=detail.classList.contains('open');
+  document.querySelectorAll('.char-detail').forEach(d=>d.classList.remove('open'));
+  document.querySelectorAll('.char-card').forEach(c=>c.classList.remove('expanded'));
+  if(!isOpen){detail.classList.add('open');card.classList.add('expanded');}
+}
+
+function toggleWrite(){
+  const panel=document.getElementById('write-panel');
+  const bar=document.getElementById('contribute-bar');
+  const visible=panel.classList.contains('visible');
+  panel.classList.toggle('visible',!visible);
+  bar.style.display=visible?'':'none';
+}
+
+function setTab(id,btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-'+id).classList.add('active');
+}
+
+renderChars();
+</script>
+</body>
+</html>
